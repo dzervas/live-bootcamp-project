@@ -8,7 +8,9 @@ pub struct TestApp {
 
 impl TestApp {
 	pub async fn new() -> Self {
-		let app = Application::build("127.0.0.1:0")
+		let user_store = auth_service::UserStoreType::default();
+		let app_state = auth_service::AppState::new(user_store);
+		let app = Application::build(app_state, "127.0.0.1:0")
 			.await
 			.expect("Failed to build app");
 
@@ -37,7 +39,7 @@ impl TestApp {
 
 	pub async fn post_signup<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
 		self.http_client
-			.post(&format!("{}/signup", &self.address))
+			.post(format!("{}/signup", &self.address))
 			.json(body)
 			.send()
 			.await

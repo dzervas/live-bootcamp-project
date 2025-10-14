@@ -3,6 +3,7 @@ use std::error::Error;
 use axum::Router;
 use axum::serve::Serve;
 use axum::routing::post;
+use serde::Serialize;
 use tower_http::services::ServeDir;
 
 mod app_state;
@@ -11,6 +12,7 @@ mod routes;
 mod services;
 
 pub use app_state::*;
+pub use routes::signup::SignupResponse;
 
 // This struct encapsulates our application-related logic.
 pub struct Application {
@@ -45,4 +47,10 @@ impl Application {
 		println!("listening on {}", &self.address);
 		self.server.await
 	}
+}
+
+#[derive(Serialize)]
+pub struct ErrorResponse {
+	pub error: bool,
+	pub message: String,
 }
