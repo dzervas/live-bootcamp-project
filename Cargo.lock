@@ -103,6 +103,7 @@ name = "auth-service"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "axum",
  "reqwest 0.12.23",
  "serde",

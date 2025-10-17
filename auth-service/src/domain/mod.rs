@@ -1,5 +1,7 @@
-mod user;
+mod data_stores;
 mod error;
+mod user;
 
-pub use user::*;
+pub use data_stores::*;
 pub use error::AuthAPIError;
+pub use user::*;

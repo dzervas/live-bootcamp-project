@@ -15,6 +15,7 @@ mod services;
 
 pub use app_state::*;
 pub use routes::signup::SignupResponse;
+pub use services::hashmap_user_store::HashmapUserStore;
 
 use crate::domain::AuthAPIError;
 
