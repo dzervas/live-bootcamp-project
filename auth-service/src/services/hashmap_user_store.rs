@@ -49,13 +49,13 @@ mod tests {
 	#[tokio::test]
 	async fn test_add_user() {
 		let mut store = HashmapUserStore::default();
-		store.add_user(User::new("hello@example.com".to_owned(), "1234".to_owned(), false)).await.unwrap();
+		store.add_user(User::from_str("hello@example.com", "12341234", false).unwrap()).await.unwrap();
 	}
 
 	#[tokio::test]
 	async fn test_get_user() {
 		let mut store = HashmapUserStore::default();
-		store.add_user(User::new("hello@example.com".to_owned(), "1234".to_owned(), false)).await.unwrap();
+		store.add_user(User::from_str("hello@example.com", "12341234", false).unwrap()).await.unwrap();
 		let user = store.get_user("hello@example.com").await.unwrap();
 		assert_eq!(user.email(), "hello@example.com");
 	}
@@ -63,11 +63,11 @@ mod tests {
 	#[tokio::test]
 	async fn test_validate_user() {
 		let mut store = HashmapUserStore::default();
-		store.add_user(User::new("hello@example.com".to_owned(), "1234".to_owned(), false)).await.unwrap();
+		store.add_user(User::from_str("hello@example.com", "12341234", false).unwrap()).await.unwrap();
 		let user = store.get_user("hello@example.com").await.unwrap();
 		assert_eq!(user.email(), "hello@example.com");
-		assert!(store.validate_user("hello@example.com", "1234").await.is_ok());
+		assert!(store.validate_user("hello@example.com", "12341234").await.is_ok());
 		assert!(store.validate_user("hello@example.com", "wrong").await.is_err());
-		assert!(store.validate_user("another@example.com", "1234").await.is_err());
+		assert!(store.validate_user("another@example.com", "12341234").await.is_err());
 	}
 }

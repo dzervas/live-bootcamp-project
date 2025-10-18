@@ -1,7 +1,9 @@
+use std::str::FromStr as _;
+
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 
-use crate::domain::{AuthAPIError, User};
+use crate::domain::{AuthAPIError, Email, Password, User};
 use crate::AppState;
 
 pub async fn signup(State(state): State<AppState>, Json(request): Json<SignupRequest>) -> Result<impl IntoResponse, AuthAPIError> {
@@ -34,22 +36,8 @@ pub struct SignupRequest {
 }
 
 impl SignupRequest{
-	pub fn validate(&self) -> Result<(), String> {
-		if self.email.is_empty() || self.password.is_empty() {
-			return Err("Email and password cannot be empty".to_string());
-		}
-		if !self.email.contains('@') {
-			return Err("Invalid email format".to_string());
-		}
-		if self.password.len() < 8 {
-			return Err("Password must be at least 8 characters long".to_string());
-		}
-		Ok(())
-	}
-
 	pub fn to_user(&self) -> Result<User, String> {
-		self.validate()?;
-		Ok(User::new(self.email.clone(), self.password.clone(), self.requires_2fa))
+		Ok(User::new(Email::from_str(&self.email)?, Password::from_str(&self.password)?, self.requires_2fa))
 	}
 }
 
