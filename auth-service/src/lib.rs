@@ -12,6 +12,7 @@ mod app_state;
 mod domain;
 mod routes;
 mod services;
+mod utils;
 
 pub use app_state::*;
 pub use routes::signup::SignupResponse;
@@ -60,18 +61,17 @@ pub struct ErrorResponse {
 }
 
 impl IntoResponse for AuthAPIError {
-    fn into_response(self) -> Response {
-        let (status, error_message) = match self {
-            AuthAPIError::UserAlreadyExists => (StatusCode::CONFLICT, "User already exists"),
-            AuthAPIError::InvalidCredentials => (StatusCode::BAD_REQUEST, "Invalid credentials"),
-            AuthAPIError::IncorrectPassword => (StatusCode::UNAUTHORIZED, "The password is incorrect or the user does not exist"),
-            AuthAPIError::UnexpectedError => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Unexpected error")
-            }
-        };
-        let body = Json(ErrorResponse {
-            error: error_message.to_string(),
-        });
-        (status, body).into_response()
-    }
+	fn into_response(self) -> Response {
+		let (status, error_message) = match self {
+			AuthAPIError::UserAlreadyExists => (StatusCode::CONFLICT, "User already exists"),
+			AuthAPIError::InvalidCredentials => (StatusCode::BAD_REQUEST, "Invalid credentials"),
+			AuthAPIError::IncorrectPassword => (StatusCode::UNAUTHORIZED, "The password is incorrect or the user does not exist"),
+			AuthAPIError::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Unexpected error"),
+			AuthAPIError::TokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create authentication token"),
+		};
+		let body = Json(ErrorResponse {
+			error: error_message.to_string(),
+		});
+		(status, body).into_response()
+	}
 }
