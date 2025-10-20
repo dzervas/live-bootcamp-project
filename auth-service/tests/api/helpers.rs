@@ -42,17 +42,17 @@ impl TestApp {
 
 	pub async fn post_signup<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
 		self.http_client
-			.post(format!("{}/signup", &self.address))
+			.post(format!("{}/signup", self.address))
 			.json(body)
 			.send()
 			.await
 			.expect("Failed to execute request.")
 	}
 
-	#[allow(unused_variables)]
-	pub async fn post_login(&self, email: &'static str, password: &'static str) -> reqwest::Response {
+	pub async fn post_login<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
 		self.http_client
 			.post(format!("{}/login", self.address))
+			.json(body)
 			.send()
 			.await
 			.expect("Failed to execute request.")

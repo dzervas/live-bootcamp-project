@@ -24,12 +24,14 @@ impl User {
 		})
 	}
 
-	pub fn email(&self) -> &str { self.email.as_ref() }
-	pub fn password(&self) -> &str { self.password.as_ref() }
+	pub fn email(&self) -> Email { self.email.clone() }
+	pub fn email_str(&self) -> &str { self.email.as_ref() }
+	pub fn password(&self) -> Password { self.password.clone() }
+	pub fn password_str(&self) -> &str { self.password.as_ref() }
 	pub fn requires_2fa(&self) -> bool { self.requires_2fa }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Email(String);
 
 impl AsRef<str> for Email {
@@ -50,7 +52,7 @@ impl FromStr for Email {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Password(String);
 
 impl AsRef<str> for Password {

@@ -1,6 +1,9 @@
 use std::str::FromStr as _;
 
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::Json;
+use axum::response::IntoResponse;
+use axum::http::StatusCode;
+use axum::extract::State;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::{AuthAPIError, Email, Password, User};
@@ -13,10 +16,14 @@ pub async fn signup(State(state): State<AppState>, Json(request): Json<SignupReq
 	let mut user_store = state.user_store.write().await;
 
 	let response = SignupResponse {
-		message: format!("User {} created successfully", user.email()),
+		message: format!("User {} created successfully", user.email_str()),
 	};
 
-	if user_store.get_user(user.email()).await.is_ok() {
+	let Ok(user_email) = Email::from_str(&request.email) else {
+		return Err(AuthAPIError::InvalidCredentials);
+	};
+
+	if user_store.get_user(user_email).await.is_ok() {
 		return Err(AuthAPIError::UserAlreadyExists);
 	}
 
