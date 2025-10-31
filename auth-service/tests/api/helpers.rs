@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
 use auth_service::Application;
+use reqwest::cookie::Jar;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
 pub struct TestApp {
 	pub address: String,
+	pub cookie_jar: Arc<Jar>,
 	pub http_client: reqwest::Client,
 }
 
@@ -24,11 +26,16 @@ impl TestApp {
 		#[allow(clippy::let_underscore_future)]
 		let _ = tokio::spawn(app.run());
 
-		let http_client = reqwest::Client::new();
+		let cookie_jar = Arc::new(Jar::default());
+		let http_client = reqwest::Client::builder()
+			.cookie_provider(Arc::clone(&cookie_jar))
+			.build()
+			.unwrap();
 
 		Self {
+			address,
+			cookie_jar,
 			http_client,
-			address
 		}
 	}
 
@@ -68,7 +75,7 @@ impl TestApp {
 	}
 
 	#[allow(unused_variables)]
-	pub async fn post_logout(&self, jwt: &'static str) -> reqwest::Response {
+	pub async fn post_logout<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
 		self.http_client
 			.post(format!("{}/logout", self.address))
 			.send()
