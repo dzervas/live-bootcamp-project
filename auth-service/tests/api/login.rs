@@ -56,7 +56,7 @@ async fn should_return_401_if_incorrect_credentials() {
 async fn should_return_204_if_valid_input() {
 	let app = TestApp::new().await;
 
-	let random_email = get_random_email(); // Call helper method to generate email 
+	let random_email = get_random_email(); // Call helper method to generate email
 	let user_payload = serde_json::json!({"email": random_email, "password": "password123", "requires2FA": false});
 
 	let response = app.post_signup(&user_payload).await;

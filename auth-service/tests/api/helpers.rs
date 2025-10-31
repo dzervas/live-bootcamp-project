@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use auth_service::Application;
+use auth_service::{test, Application};
 use reqwest::cookie::Jar;
 use tokio::sync::RwLock;
 use uuid::Uuid;
@@ -15,7 +15,7 @@ impl TestApp {
 	pub async fn new() -> Self {
 		let user_store = auth_service::HashmapUserStore::default();
 		let app_state = auth_service::AppState::new(Arc::new(RwLock::new(Box::new(user_store))));
-		let app = Application::build(app_state, "127.0.0.1:0")
+		let app = Application::build(app_state, test::APP_ADDRESS)
 			.await
 			.expect("Failed to build app");
 
@@ -74,8 +74,7 @@ impl TestApp {
 			.expect("Failed to execute request.")
 	}
 
-	#[allow(unused_variables)]
-	pub async fn post_logout<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
+	pub async fn post_logout(&self) -> reqwest::Response {
 		self.http_client
 			.post(format!("{}/logout", self.address))
 			.send()

@@ -4,8 +4,9 @@ use axum::{Json, Router};
 use axum::response::{IntoResponse, Response};
 use axum::routing::post;
 use axum::serve::Serve;
-use axum::http::StatusCode;
+use axum::http::{Method, StatusCode};
 use serde::{Deserialize, Serialize};
+use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 
 mod app_state;
@@ -17,6 +18,7 @@ mod utils;
 pub use app_state::*;
 pub use routes::signup::SignupResponse;
 pub use services::hashmap_user_store::HashmapUserStore;
+pub use utils::constants::*;
 
 use crate::domain::AuthAPIError;
 
@@ -30,6 +32,16 @@ pub struct Application {
 
 impl Application {
 	pub async fn build(app_state: AppState, address: &str) -> Result<Self, Box<dyn Error>> {
+		let allowed_origins = [
+			"http://localhost:3000".parse()?,
+			"http://127.0.0.1:3000".parse()?,
+		];
+
+		let cors = CorsLayer::new()
+			.allow_methods([Method::GET, Method::POST])
+			.allow_origin(allowed_origins)
+			.allow_credentials(true);
+
 		let router = Router::new()
 			.nest_service("/", ServeDir::new("assets"))
 			.route("/signup", post(routes::signup))
@@ -37,7 +49,8 @@ impl Application {
 			.route("/verify-2fa", post(routes::verify_2fa))
 			.route("/logout", post(routes::logout))
 			.route("/verify-token", post(routes::verify_token))
-			.with_state(app_state);
+			.with_state(app_state)
+			.layer(cors);
 
 		let listener = tokio::net::TcpListener::bind(address).await?;
 		let address = listener.local_addr()?.to_string();
@@ -68,6 +81,8 @@ impl IntoResponse for AuthAPIError {
 			AuthAPIError::IncorrectPassword => (StatusCode::UNAUTHORIZED, "The password is incorrect or the user does not exist"),
 			AuthAPIError::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Unexpected error"),
 			AuthAPIError::TokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create authentication token"),
+			AuthAPIError::MissingToken => (StatusCode::BAD_REQUEST, "Missing authentication token"),
+			AuthAPIError::InvalidToken => (StatusCode::UNAUTHORIZED, "Invalid authentication token"),
 		};
 		let body = Json(ErrorResponse {
 			error: error_message.to_string(),
