@@ -65,10 +65,11 @@ impl TestApp {
 			.expect("Failed to execute request.")
 	}
 
-	#[allow(unused_variables)]
-	pub async fn post_verify_2fa(&self, email: &'static str, login_attempt_id: &'static str, twofa_code: &'static str) -> reqwest::Response {
+	pub async fn post_verify_2fa(&self) -> reqwest::Response {
+	// pub async fn post_verify_2fa<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
 		self.http_client
 			.post(format!("{}/verify-2fa", self.address))
+			// .json(body)
 			.send()
 			.await
 			.expect("Failed to execute request.")
@@ -82,10 +83,10 @@ impl TestApp {
 			.expect("Failed to execute request.")
 	}
 
-	#[allow(unused_variables)]
-	pub async fn post_verify_token(&self, jwt: &'static str) -> reqwest::Response {
+	pub async fn post_verify_token<Body: serde::Serialize>(&self, body: &Body) -> reqwest::Response {
 		self.http_client
 			.post(format!("{}/verify-token", self.address))
+			.json(body)
 			.send()
 			.await
 			.expect("Failed to execute request.")

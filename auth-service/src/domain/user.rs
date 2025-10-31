@@ -1,6 +1,8 @@
 use std::str::FromStr;
 
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
 pub struct User {
 	email: Email,
 	password: Password,
@@ -31,7 +33,7 @@ impl User {
 	pub fn requires_2fa(&self) -> bool { self.requires_2fa }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct Email(String);
 
 impl AsRef<str> for Email {
@@ -52,7 +54,7 @@ impl FromStr for Email {
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct Password(String);
 
 impl AsRef<str> for Password {
