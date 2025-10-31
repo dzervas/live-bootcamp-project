@@ -1,4 +1,4 @@
-use reqwest::Url;
+use reqwest::{cookie::CookieStore, Url};
 
 use crate::helpers::TestApp;
 use auth_service::JWT_COOKIE_NAME;
@@ -35,8 +35,14 @@ async fn should_return_200_if_valid_jwt_cookie() {
 	let response = app.post_login(&login_payload).await;
 	assert_eq!(response.status().as_u16(), 204, "Failed to log in");
 
+	let header = app.cookie_jar.cookies(&"http://127.0.0.1".parse().unwrap()).unwrap();
+	let token = header.to_str().unwrap().split('=').collect::<Vec<&str>>()[1];
+
 	let response = app.post_logout().await;
 	assert_eq!(response.status().as_u16(), 200);
+
+	let banned_store = app.banned_token_store.read().await;
+	assert!(banned_store.check(token).await.is_err());
 }
 
 #[tokio::test]

@@ -18,6 +18,7 @@ mod utils;
 pub use app_state::*;
 pub use routes::signup::SignupResponse;
 pub use services::hashmap_user_store::HashmapUserStore;
+pub use services::hashset_banned_token_store::HashsetBannedTokenStore;
 pub use utils::constants::*;
 
 use crate::domain::AuthAPIError;

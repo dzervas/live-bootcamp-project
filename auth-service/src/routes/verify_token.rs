@@ -11,7 +11,7 @@ pub async fn verify_token(
 	State(state): State<AppState>,
 	Json(request): Json<VerifyTokenRequest>,
 ) -> Result<impl IntoResponse, AuthAPIError> {
-	let claim = validate_token(&request.token).await.map_err(|_| AuthAPIError::InvalidToken)?;
+	let claim = validate_token(&request.token, &state.banned_token_store).await.map_err(|_| AuthAPIError::InvalidToken)?;
 
 	let user_store = state.user_store.read().await;
 	let user_email = user_store.get_user_str(&claim.sub).await.map_err(|_| AuthAPIError::UnexpectedError)?;

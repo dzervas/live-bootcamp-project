@@ -29,9 +29,7 @@ async fn should_return_200_valid_token() {
 	assert_eq!(response.status().as_u16(), 204, "Failed to log in");
 
 	let header = app.cookie_jar.cookies(&"http://127.0.0.1".parse().unwrap()).unwrap();
-	eprintln!("header: {header:?}");
 	let token = header.to_str().unwrap().split('=').collect::<Vec<&str>>()[1];
-	eprintln!("token: {token}");
 	let data = serde_json::json!({"token": token});
 	let response = app.post_verify_token(&data).await;
 	assert_eq!(response.status().as_u16(), 200);
@@ -44,4 +42,26 @@ async fn should_return_401_if_invalid_token() {
 	let test_case = serde_json::json!({"token": "invalid"});
 	let response = app.post_verify_token(&test_case).await;
 	assert_eq!(response.status().as_u16(), 401, "Failed for input: {:?}", test_case);
+}
+
+#[tokio::test]
+async fn should_return_401_if_banned_token() {
+	let app = TestApp::new().await;
+
+	let user_payload = serde_json::json!({"email": "hello@world.com", "password": "password123", "requires2FA": false});
+	let response = app.post_signup(&user_payload).await;
+	assert_eq!(response.status().as_u16(), 201, "Failed to create user");
+	let login_payload = serde_json::json!({"email": "hello@world.com", "password": "password123"});
+	let response = app.post_login(&login_payload).await;
+	assert_eq!(response.status().as_u16(), 204, "Failed to log in");
+
+	let header = app.cookie_jar.cookies(&"http://127.0.0.1".parse().unwrap()).unwrap();
+	let token = header.to_str().unwrap().split('=').collect::<Vec<&str>>()[1];
+	let data = serde_json::json!({"token": token});
+
+	let response = app.post_logout().await;
+	assert_eq!(response.status().as_u16(), 200);
+
+	let response = app.post_verify_token(&data).await;
+	assert_eq!(response.status().as_u16(), 401);
 }
