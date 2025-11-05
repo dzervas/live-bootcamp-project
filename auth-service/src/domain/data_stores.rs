@@ -99,7 +99,7 @@ impl TwoFACode {
 			return Err("Invalid code length".to_string());
 		}
 
-		if !code.chars().all(|c| c.is_ascii_digit()) {
+		if !code.chars().all(|c| c.is_ascii_alphanumeric()) {
 			return Err("Invalid code characters".to_string());
 		}
 

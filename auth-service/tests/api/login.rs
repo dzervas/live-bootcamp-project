@@ -7,7 +7,6 @@ use auth_service::{Email, TwoFactorAuthResponse};
 async fn should_return_422_if_malformed_input() {
 	let app = TestApp::new().await;
 
-	// TODO: add more malformed input test cases
 	let test_cases = [
 		serde_json::json!({ "password": "password123"}),
 		serde_json::json!({ "email": "password123"}),
@@ -24,7 +23,7 @@ async fn should_return_422_if_malformed_input() {
 async fn should_return_400_if_bad_user() {
 	let app = TestApp::new().await;
 
-	let random_email = get_random_email(); // Call helper method to generate email 
+	let random_email = get_random_email(); // Call helper method to generate email
 
 	// TODO: add more malformed input test cases
 	let test_cases = [
@@ -44,7 +43,7 @@ async fn should_return_400_if_bad_user() {
 async fn should_return_401_if_incorrect_credentials() {
 	let app = TestApp::new().await;
 
-	let random_email = get_random_email(); // Call helper method to generate email 
+	let random_email = get_random_email(); // Call helper method to generate email
 
 	let user_payload = serde_json::json!({"email": random_email, "password": "password123", "requires2FA": false});
 	let response = app.post_signup(&user_payload).await;
