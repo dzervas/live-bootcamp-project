@@ -7,7 +7,7 @@ use axum::http::StatusCode;
 use axum_extra::extract::CookieJar;
 use serde::{Deserialize, Serialize};
 
-use crate::domain::{AuthAPIError, Email, LoginAttemptId, Password, TwoFACode, TwoFACodeStore};
+use crate::domain::{AuthAPIError, Email, LoginAttemptId, Password, TwoFACode};
 use crate::AppState;
 
 pub async fn login(
@@ -45,6 +45,12 @@ async fn handle_2fa(email: Email, state: &AppState, jar: CookieJar) -> Result<(C
 		.add_code(email.clone(), login_attempt_id.clone(), two_fa_code.clone()).await
 		.map_err(|_| AuthAPIError::UnexpectedError)?;
 
+	state.email_client.write().await.send_email(
+		&email,
+		"Let's Get Rusty Bootcamp: 2FA Login",
+		format!("Your 2FA code is: {}", two_fa_code.as_ref()).as_str()
+	).await.map_err(|_| AuthAPIError::UnexpectedError)?;
+
 	let twofa_response = LoginResponse::TwoFactorAuth(TwoFactorAuthResponse {
 		message: "2FA required".to_string(),
 		login_attempt_id: two_fa_code.as_ref().to_string(),
@@ -73,7 +79,7 @@ pub struct LoginRequest {
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
 pub enum LoginResponse {
-    RegularAuth,
+    // RegularAuth,
     TwoFactorAuth(TwoFactorAuthResponse),
 }
 

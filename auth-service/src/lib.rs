@@ -20,6 +20,7 @@ pub use routes::signup::SignupResponse;
 pub use services::hashmap_user_store::HashmapUserStore;
 pub use services::hashset_banned_token_store::HashsetBannedTokenStore;
 pub use services::hashmap_two_fa_code_store::HashmapTwoFACodeStore;
+pub use services::mock_email_client::MockEmailClient;
 pub use utils::constants::*;
 pub use routes::login::TwoFactorAuthResponse;
 pub use domain::Email;
