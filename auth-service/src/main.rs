@@ -9,7 +9,9 @@ async fn main() {
 	let user_store_box: UserStoreType = Arc::new(RwLock::new(Box::new(user_store)));
 	let banned_token_store = auth_service::HashsetBannedTokenStore::default();
 	let banned_token_store_box: BannedTokenStoreType = Arc::new(RwLock::new(Box::new(banned_token_store)));
-	let app_state = AppState::new(user_store_box, banned_token_store_box);
+	let two_fa_code_store = auth_service::HashmapTwoFACodeStore::default();
+	let two_fa_code_store_box: auth_service::TwoFACodeStoreType = Arc::new(RwLock::new(Box::new(two_fa_code_store)));
+	let app_state = AppState::new(user_store_box, banned_token_store_box, two_fa_code_store_box);
 
 	let app = Application::build(app_state, prod::APP_ADDRESS)
 		.await

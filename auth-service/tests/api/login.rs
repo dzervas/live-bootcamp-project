@@ -1,4 +1,7 @@
+use std::str::FromStr;
+
 use crate::helpers::{get_random_email, TestApp};
+use auth_service::{Email, TwoFactorAuthResponse};
 
 #[tokio::test]
 async fn should_return_422_if_malformed_input() {
@@ -64,4 +67,22 @@ async fn should_return_204_if_valid_input() {
 	let login_payload = serde_json::json!({"email": random_email, "password": "password123"});
 	let response = app.post_login(&login_payload).await;
 	assert_eq!(response.status().as_u16(), 204, "Failed for input: {login_payload:?}");
+}
+
+#[tokio::test]
+async fn should_return_206_if_valid_credentials_and_2fa_enabled() {
+	let app = TestApp::new().await;
+
+	let random_email = get_random_email(); // Call helper method to generate email
+	let user_payload = serde_json::json!({"email": random_email, "password": "password123", "requires2FA": true});
+
+	let response = app.post_signup(&user_payload).await;
+	assert_eq!(response.status().as_u16(), 201, "Failed to create user");
+
+	let login_payload = serde_json::json!({"email": random_email, "password": "password123"});
+	let response = app.post_login(&login_payload).await;
+	assert_eq!(response.status().as_u16(), 206, "Failed for input: {login_payload:?}");
+	assert_eq!(response.json::<TwoFactorAuthResponse>().await.unwrap().message, "2FA required");
+
+	let _ = app.two_fa_code_store.read().await.get_code(&Email::from_str(&random_email).unwrap()).await.unwrap();
 }
