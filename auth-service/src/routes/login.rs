@@ -45,15 +45,18 @@ async fn handle_2fa(email: Email, state: &AppState, jar: CookieJar) -> Result<(C
 		.add_code(email.clone(), login_attempt_id.clone(), two_fa_code.clone()).await
 		.map_err(|_| AuthAPIError::UnexpectedError)?;
 
-	state.email_client.write().await.send_email(
-		&email,
-		"Let's Get Rusty Bootcamp: 2FA Login",
-		format!("Your 2FA code is: {}", two_fa_code.as_ref()).as_str()
-	).await.map_err(|_| AuthAPIError::UnexpectedError)?;
+	state.email_client
+		.write().await
+		.send_email(
+			&email,
+			"Let's Get Rusty Bootcamp: 2FA Login",
+			format!("Your 2FA code is: {}", two_fa_code.as_ref()).as_str()
+		).await
+		.map_err(|_| AuthAPIError::UnexpectedError)?;
 
 	let twofa_response = LoginResponse::TwoFactorAuth(TwoFactorAuthResponse {
 		message: "2FA required".to_string(),
-		login_attempt_id: two_fa_code.as_ref().to_string(),
+		login_attempt_id: login_attempt_id.as_ref().to_string(),
 	});
 
 	Ok((jar, (StatusCode::PARTIAL_CONTENT, Json(twofa_response)).into_response()))

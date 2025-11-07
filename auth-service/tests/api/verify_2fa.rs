@@ -5,6 +5,28 @@ use auth_service::{Email, TwoFactorAuthResponse};
 use crate::helpers::{get_random_email, TestApp};
 
 #[tokio::test]
+async fn should_return_200_if_correct_code() {
+	let app = TestApp::new().await;
+
+	let random_email = get_random_email(); // Call helper method to generate email
+	let user_payload = serde_json::json!({"email": random_email, "password": "password123", "requires2FA": true});
+
+	let response = app.post_signup(&user_payload).await;
+	assert_eq!(response.status().as_u16(), 201, "Failed to create user");
+	let login_payload = serde_json::json!({"email": random_email, "password": "password123"});
+	let response = app.post_login(&login_payload).await;
+	assert_eq!(response.status().as_u16(), 206);
+	// let login = response.json::<TwoFactorAuthResponse>().await.unwrap();
+	let (login_attempt_id, code) = {
+		let two_fa_code_store = app.two_fa_code_store.read().await;
+		two_fa_code_store.get_code(&Email::from_str(&random_email).unwrap()).await.unwrap()
+	};
+	let correct_2fa_code = serde_json::json!({"email": random_email, "loginAttemptId": login_attempt_id.as_ref(), "2FACode": code.as_ref()});
+	let response = app.post_verify_2fa(&correct_2fa_code).await;
+	assert_eq!(response.status().as_u16(), 200);
+}
+
+#[tokio::test]
 async fn should_return_422_if_malformed_input() {
 	let app = TestApp::new().await;
 

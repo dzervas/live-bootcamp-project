@@ -88,6 +88,7 @@ impl IntoResponse for AuthAPIError {
 			AuthAPIError::TokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create authentication token"),
 			AuthAPIError::MissingToken => (StatusCode::BAD_REQUEST, "Missing authentication token"),
 			AuthAPIError::InvalidToken => (StatusCode::UNAUTHORIZED, "Invalid authentication token"),
+			AuthAPIError::Invalid2FACredentials => (StatusCode::UNAUTHORIZED, "Invalid 2FA code or login attempt ID"),
 		};
 		let body = Json(ErrorResponse {
 			error: error_message.to_string(),

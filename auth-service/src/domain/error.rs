@@ -6,4 +6,5 @@ pub enum AuthAPIError {
 	TokenCreationError,
 	MissingToken,
 	InvalidToken,
+	Invalid2FACredentials,
 }
