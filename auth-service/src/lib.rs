@@ -6,6 +6,8 @@ use axum::routing::post;
 use axum::serve::Serve;
 use axum::http::{Method, StatusCode};
 use serde::{Deserialize, Serialize};
+use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::SqlitePool;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 
@@ -95,4 +97,10 @@ impl IntoResponse for AuthAPIError {
 		});
 		(status, body).into_response()
 	}
+}
+
+pub type DatabasePool = SqlitePool;
+
+pub async fn get_sql_pool(url: &str) -> DatabasePool {
+	SqlitePoolOptions::new().connect(url).await.unwrap()
 }
